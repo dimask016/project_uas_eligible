@@ -29,19 +29,29 @@ class Transaction extends Model
     ];
 
     /**
-     * transactionDetails
+     * transactionDetails (Method Bawaan Project)
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function transactionDetails()
     {
-        return $this->hasMany(TransactionDetail::class);
+        return $this->hasMany(TransactionDetail::class, 'transaction_id');
+    }
+
+    /**
+     * details (Alias Relasi agar Kompatibel dengan Controller)
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function details()
+    {
+        return $this->hasMany(TransactionDetail::class, 'transaction_id');
     }
 
     /**
      * user
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function user()
     {
@@ -51,7 +61,7 @@ class Transaction extends Model
     /**
      * province
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function province()
     {
@@ -61,7 +71,7 @@ class Transaction extends Model
     /**
      * city
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function city()
     {
@@ -71,7 +81,7 @@ class Transaction extends Model
     /**
      * district
      *
-     * @return void
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function district()
     {
@@ -79,7 +89,7 @@ class Transaction extends Model
     }
 
     /**
-     * createdAt
+     * createdAt (Formatting Tanggal)
      *
      * @return Attribute
      */

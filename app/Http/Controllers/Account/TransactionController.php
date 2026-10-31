@@ -2,79 +2,70 @@
 
 namespace App\Http\Controllers\Account;
 
-use App\Models\Transaction;
 use App\Http\Controllers\Controller;
-use Illuminate\Routing\Controllers\Middleware;
-use Illuminate\Routing\Controllers\HasMiddleware;
+use App\Models\Transaction;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
 
-class TransactionController extends Controller implements HasMiddleware
+class TransactionController extends Controller
 {
-    /**
-     * middleware
-     *
-     * @return array
-     */
-    public static function middleware(): array
-    {
-        return [
-            new Middleware(['permission:transactions.index'], only: ['index']),
-            new Middleware(['permission:transactions.show'], only: ['show']),
-        ];
-    }
-
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Inertia\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        /**
-         * get role
-         */
-        $role = auth()->user()->getRoleNames();
-        
-        /**
-         * get transactions
-         */
-        if ($role[0] == 'admin') {
+        $user = auth()->user();
 
-            //get transactions
-            $transactions = Transaction::with('user')->when(request()->q, function($categories) {
-                $categories = $categories->where('invoice', 'like', '%'. request()->q . '%');
-            })->latest()->paginate(5);
+        // Query dasar transaksi beserta data relasi user
+        $query = Transaction::with('user');
 
-        } else {
-            
-            //get transactions
-            $transactions = Transaction::with('user')->when(request()->q, function($categories) {
-                $categories = $categories->where('invoice', 'like', '%'. request()->q . '%');
-            })->where('user_id', auth()->user()->id)->latest()->paginate(5);
-
+        // Jika bukan Admin, filter hanya transaksi milik user bersangkutan
+        if (!($user->hasRole('admin') || (isset($user->is_admin) && $user->is_admin == 1))) {
+            $query->where('user_id', $user->id);
         }
 
-        //append query string to pagination links
-        $transactions->appends(['q' => request()->q]);
+        // Filter berdasarkan pencarian No. Invoice
+        if ($request->q) {
+            $query->where('invoice', 'like', '%' . $request->q . '%');
+        }
 
-        //return inertia
-        return inertia('Account/Transactions/Index', [
+        // Filter berdasarkan Status (UNPAID, PAID, EXPIRED, CANCELLED)
+        if ($request->status && in_array(strtoupper($request->status), ['UNPAID', 'PAID', 'EXPIRED', 'CANCELLED'])) {
+            $query->where('status', strtoupper($request->status));
+        }
+
+        $transactions = $query->latest()->paginate(10);
+
+        return Inertia::render('Account/Transactions/Index', [
             'transactions' => $transactions,
+            'filters'      => $request->all(['q', 'status']),
         ]);
     }
-    
+
     /**
-     * show
+     * Display the specified resource.
      *
-     * @param  mixed $invoice
-     * @return void
+     * @param  string  $invoice
+     * @return \Inertia\Response
      */
     public function show($invoice)
     {
-        //get detail transaction by "reference"
-        $transaction = Transaction::with('transactionDetails.product', 'user', 'province', 'city')->where('invoice', $invoice)->first();
+        // Menggunakan transactionDetails sesuai nama method di Model Transaction.php
+        $transaction = Transaction::with([
+            'transactionDetails.product', 
+            'user', 
+            'province', 
+            'city', 
+            'district'
+        ])
+        ->where('invoice', $invoice)
+        ->orWhere('reference', $invoice)
+        ->firstOrFail();
 
-        //return inertia
-        return inertia('Account/Transactions/Show', [
+        return Inertia::render('Account/Transactions/Show', [
             'transaction' => $transaction,
         ]);
     }

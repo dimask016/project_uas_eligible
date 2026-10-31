@@ -26,11 +26,13 @@ class CheckoutController extends Controller
             ->where('user_id', auth()->user()->id)
             ->get();
 
-        $totalPrice = $carts->sum('price');$totalWeight = $carts->sum(function ($cart) {
-            return ($cart->weight ?? 0) * $cart->qty;
+        $totalPrice = $carts->sum('price');
+        $totalWeight = $carts->sum(function ($cart) {
+            return ($cart->weight ?? 0) * ($cart->qty ?? 1);
         });
 
-        if ($totalWeight <= 0) {$totalWeight = 1000; // Minimal 1kg
+        if ($totalWeight <= 0) {
+            $totalWeight = 1000; // Minimal 1kg
         }
 
         return inertia('Web/Checkouts/Index', [
@@ -47,7 +49,7 @@ class CheckoutController extends Controller
      */
     public function getCities(Request $request)
     {
-        $cities = City::where('province_id',$request->province_id)->get();
+        $cities = City::where('province_id', $request->province_id)->get();
         return response()->json($cities);
     }
 
@@ -56,7 +58,7 @@ class CheckoutController extends Controller
      */
     public function getDistricts(Request $request)
     {
-        $districts = District::where('city_id',$request->city_id)->get();
+        $districts = District::where('city_id', $request->city_id)->get();
         return response()->json($districts);
     }
 
@@ -65,15 +67,16 @@ class CheckoutController extends Controller
      */
     public function checkOngkir(Request $request)
     {
-        $apiKey  = env('RAJAONGKIR_API_KEY');$origin  = env('RAJAONGKIR_ORIGIN_CITY_ID', 606); 
+        $apiKey  = config('services.rajaongkir.key', env('RAJAONGKIR_API_KEY'));
+        $origin  = config('services.rajaongkir.origin', env('RAJAONGKIR_ORIGIN_CITY_ID', 606)); 
         $courier = strtolower($request->courier);
-        $weight  =$request->weight ?? 1000;
-        $destination =$request->destination;
+        $weight  = $request->weight ?? 1000;
+        $destination = $request->destination;
 
-        if ($apiKey &&$destination) {
+        if ($apiKey && $destination) {
             try {
                 $district = District::find($destination);
-                $destinationCityId =$district ? $district->city_id :$destination;
+                $destinationCityId = $district ? $district->city_id : $destination;
 
                 $response = Http::timeout(3)->connectTimeout(2)->withHeaders([
                     'key' => $apiKey,
@@ -86,7 +89,8 @@ class CheckoutController extends Controller
                     'courier'         => $courier,
                 ]);
 
-                if ($response->failed()) {$response = Http::timeout(3)->connectTimeout(2)->withHeaders([
+                if ($response->failed()) {
+                    $response = Http::timeout(3)->connectTimeout(2)->withHeaders([
                         'key' => $apiKey,
                     ])->post('https://api.rajaongkir.com/starter/cost', [
                         'origin'      => 55,
@@ -97,10 +101,12 @@ class CheckoutController extends Controller
                 }
 
                 if ($response->successful()) {
-                    $costs =$response->json()['rajaongkir']['results'][0]['costs'] ?? [];
+                    $costs = $response->json()['rajaongkir']['results'][0]['costs'] ?? [];
 
-                    if (!empty($costs)) {$results = [];
-                        foreach ($costs as $cost) {$results[] = [
+                    if (!empty($costs)) {
+                        $results = [];
+                        foreach ($costs as $cost) {
+                            $results[] = [
                                 'service' => strtoupper($courier) . ' ' . $cost['service'] . ' (' . ($cost['cost'][0]['etd'] ?? '1-3') . ' Hari)',
                                 'cost'    => $cost['cost'][0]['value']
                             ];
@@ -137,9 +143,10 @@ class CheckoutController extends Controller
         ];
 
         $fallbackResults = [];
-        foreach ($courierRates as $rate) {$fallbackResults[] = [
+        foreach ($courierRates as $rate) {
+            $fallbackResults[] = [
                 'service' => $rate['service'],
-                'cost'    => $rate['base_cost'] *$multiplier
+                'cost'    => $rate['base_cost'] * $multiplier
             ];
         }
 
@@ -160,30 +167,40 @@ class CheckoutController extends Controller
             'courier_cost'    => 'required|numeric',
             'grand_total'     => 'required|numeric',
             'address'         => 'required',
+            'payment_method'  => 'nullable|string', // Contoh: 'B1' (BCA VA), 'M1' (Mandiri VA), 'VC' (Credit Card)
         ]);
 
-        // 1. Ambil Kredensial Duitku dari .env
+        // 1. Ambil Kredensial Duitku dari .env / Config
         $merchantCode = env('DUITKU_MERCHANT_CODE', 'DS37139');
-        $merchantKey  = env('DUITKU_MERCHANT_KEY', '');$isSandbox    = env('DUITKU_SANDBOX_MODE', true);
+        $merchantKey  = env('DUITKU_MERCHANT_KEY', '');
+        $isSandbox    = env('DUITKU_SANDBOX_MODE', true);
 
-        $paymentAmount   = (int)$request->grand_total;
-        $merchantOrderId = 'INV' . time(); // ID Transaksi Tanpa Karakter Khusus
+        // Keamanan Tambahan: Kalkulasi ulang Grand Total dari Database (Mencegah Tampering)
+        $carts = Cart::where('user_id', auth()->user()->id)->get();
+        $realCartTotal = $carts->sum('price');
+        $calculatedGrandTotal = $realCartTotal + (int) $request->courier_cost;
 
-        // 2. Format Signature MD5 Duitku
-        $signature = md5($merchantCode .$merchantOrderId . $paymentAmount .$merchantKey);
+        $paymentAmount   = $calculatedGrandTotal > 0 ? $calculatedGrandTotal : (int) $request->grand_total;
+        $merchantOrderId = 'INV' . time(); 
 
-        // 3. Payload Parameter Request Duitku
+        // 2. Format Signature MD5 Duitku (merchantCode + merchantOrderId + paymentAmount + merchantKey)
+        $signature = md5($merchantCode . $merchantOrderId . $paymentAmount . $merchantKey);
+
+        // Set Default Payment Method ke VC atau amankan dari input request (cth: 'B1' untuk BCA VA, 'M1' Mandiri, 'VC' Credit Card)
+        $paymentMethod = $request->payment_method ?? 'VC'; 
+
+        // 3. Payload Parameter Request Duitku V2
         $params = [
             'merchantCode'     => $merchantCode,
             'paymentAmount'    => $paymentAmount,
-            'paymentMethod'    => 'VC',
+            'paymentMethod'    => $paymentMethod,
             'merchantOrderId'  => $merchantOrderId,
             'productDetails'   => 'Pembayaran Pesanan 2R Store',
             'additionalParam'  => '',
             'merchantUserInfo' => auth()->user()->email ?? 'customer@example.com',
             'customerVaName'   => auth()->user()->name ?? 'Customer',
             'email'            => auth()->user()->email ?? 'customer@example.com',
-            'phoneNumber'      => '08123456789',
+            'phoneNumber'      => '082189606233',
             'itemDetails'      => [
                 [
                     'name'     => 'Total Pesanan & Ongkir',
@@ -198,15 +215,15 @@ class CheckoutController extends Controller
         ];
 
         // 4. Hit Endpoint API Duitku V2
-        $endpoint =$isSandbox 
+        $endpoint = $isSandbox 
             ? 'https://sandbox.duitku.com/webapi/api/merchant/v2/inquiry' 
             : 'https://passport.duitku.com/webapi/api/merchant/v2/inquiry';
 
         $response = Http::withHeaders([
             'Content-Type' => 'application/json'
-        ])->post($endpoint,$params);
+        ])->post($endpoint, $params);
 
-        $result =$response->json();
+        $result = $response->json();
 
         // Log respon API Duitku ke storage/logs/laravel.log
         Log::info('Duitku API Response Log:', [
@@ -215,9 +232,9 @@ class CheckoutController extends Controller
         ]);
 
         // 5. Cek Hasil API Response
-        if (isset($result['statusCode']) &&$result['statusCode'] == '00') {
+        if (isset($result['statusCode']) && $result['statusCode'] == '00') {
             
-            DB::transaction(function () use ($request, $merchantOrderId,$result) {
+            DB::transaction(function () use ($request, $merchantOrderId, $paymentAmount, $result) {
                 if (class_exists('App\Models\Invoice')) {
                     Invoice::create([
                         'invoice'         => $merchantOrderId,
@@ -226,7 +243,7 @@ class CheckoutController extends Controller
                         'courier_service' => $request->courier_service,
                         'courier_cost'    => $request->courier_cost,
                         'weight'          => $request->weight ?? 1000,
-                        'grand_total'     => $request->grand_total,
+                        'grand_total'     => $paymentAmount,
                         'province_id'     => $request->province_id,
                         'city_id'         => $request->city_id,
                         'district_id'     => $request->district_id,

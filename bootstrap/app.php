@@ -19,10 +19,15 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
         ]);
-        $middleware->redirectTo(guests: '/login', users: '/account/dashboard');
+        
+        // Redirect guest yang belum login ke /login, sedangkan user login di-redirect ke halaman utama jika bukan admin
+        $middleware->redirectTo(guests: '/login', users: '/');
 
-        //except csrf tokens for callback route
-        $middleware->validateCsrfTokens(except: ['/callback']);
+        // Except CSRF tokens for Duitku callback routes
+        $middleware->validateCsrfTokens(except: [
+            '/callback',
+            '/checkouts/callback'
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
