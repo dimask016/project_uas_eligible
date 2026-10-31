@@ -1,8 +1,48 @@
-https://dimask016.github.io/project_uas_eligible/Presentation/Presentasi_DimasK_Project_UAS_WAD.html
+# 2R STORE - E-Commerce Platform (Laravel 12 & Inertia React)
 
-2R STORE - E-Commerce Platform (Laravel 12 & Inertia React)Aplikasi e-commerce 2R STORE dibangun menggunakan framework Laravel 12 dan Inertia.js (React), terintegrasi dengan Duitku Payment Gateway dan RajaOngkir API. Dokumen ini berisi rincian infrastruktur server AWS EC2, struktur direktori project, fitur aplikasi, serta alur deployment.📌 Informasi Repository & ServerRepository GitHub: https://github.com/dimask016/project_uas_eligibleAkses Web Public & Admin: http://ec2-32-236-168-110.ap-southeast-2.compute.amazonaws.com:8000Database Server: ec2-13-210-247-47.ap-southeast-2.compute.amazonaws.com🛠️ Manajemen Environment & Deployment AWS EC2Penggunaan AWS EC2 mengubah beberapa tahapan infrastruktur dan pengelolaan server:1. Provisioning Instans EC2Membuat instans EC2 baru (misal: Amazon Linux 2023 / Ubuntu) melalui AWS Management Console / CLI.Mengonfigurasi Security Group (Firewall EC2) untuk membuka port akses:Port 22 (SSH): Terbatas hanya untuk IP pengembang.Port 8000 (HTTP) & 443 (HTTPS): Terbuka untuk umum (0.0.0.0/0).Port 5177 & 3306: Akses port internal/database.Menyiapkan Kunci Privat SSH (.pem / .ppk) untuk akses masuk ke server EC2.2. Koneksi & Instalasi RuntimeMasuk ke instans EC2 via SSH:ssh -i "your-key.pem" ec2-user@ec2-32-236-168-110.ap-southeast-2.compute.amazonaws.com
-Membuat Service Systemd untuk Laravel ServerBuat file service agar Laravel Artisan serve berjalan secara otomatis di background:sudo nano /etc/systemd/system/laravel.service
-Masukkan konfigurasi berikut:[Unit]
+Aplikasi e-commerce **2R STORE** dibangun menggunakan framework **Laravel 12** dan **Inertia.js (React)**, terintegrasi dengan **Duitku Payment Gateway** dan **RajaOngkir API**. Dokumen ini berisi rincian infrastruktur server AWS EC2, struktur direktori project, fitur aplikasi, serta alur deployment.
+
+---
+
+## 📌 Informasi Repository & Server
+
+- **Repository GitHub**: [https://github.com/dimask016/project_uas_eligible](https://github.com/dimask016/project_uas_eligible)
+- **Presentation Site**: [https://dimask016.github.io/project_uas_eligible/Presentation/Presentasi_DimasK_Project_UAS_WAD.html](https://dimask016.github.io/project_uas_eligible/Presentation/Presentasi_DimasK_Project_UAS_WAD.html)
+- **Akses Web Public & Admin**: `http://ec2-32-236-168-110.ap-southeast-2.compute.amazonaws.com:8000`
+- **Database Server**: `ec2-13-210-247-47.ap-southeast-2.compute.amazonaws.com`
+
+---
+
+## 🛠️ Manajemen Environment & Deployment AWS EC2
+
+Penggunaan AWS EC2 mengubah beberapa tahapan infrastruktur dan pengelolaan server:
+
+### 1. Provisioning Instans EC2
+- Membuat instans EC2 baru (misal: Amazon Linux 2023 / Ubuntu) melalui AWS Management Console / CLI.
+- Mengonfigurasi **Security Group (Firewall EC2)** untuk membuka port akses:
+  - **Port 22 (SSH)**: Terbatas hanya untuk IP pengembang.
+  - **Port 8000 (HTTP) & 443 (HTTPS)**: Terbuka untuk umum (`0.0.0.0/0`).
+  - **Port 5177 & 3306**: Akses port internal/database.
+- Menyiapkan Kunci Privat SSH (`.pem` / `.ppk`) untuk akses masuk ke server EC2.
+
+---
+
+### 2. Koneksi & Instalasi Runtime
+
+Masuk ke instans EC2 via SSH:
+```bash
+ssh -i "your-key.pem" ec2-user@ec2-32-236-168-110.ap-southeast-2.compute.amazonaws.com
+```
+
+#### Membuat Service Systemd untuk Laravel Server
+Buat file service agar Laravel Artisan serve berjalan secara otomatis di background:
+```bash
+sudo nano /etc/systemd/system/laravel.service
+```
+
+Masukkan konfigurasi berikut:
+```ini
+[Unit]
 Description=Laravel Artisan Development Server
 After=network.target
 
@@ -16,14 +56,69 @@ RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
-Simpan di Nano: Ctrl + O -> Enter -> Ctrl + X.Aktifkan dan Jalankan Service Otomatissudo systemctl daemon-reload
+```
+
+> **Petunjuk Nano:** Simpan perubahan dengan `Ctrl + O` $\rightarrow$ `Enter` $\rightarrow$ Keluar `Ctrl + X`.
+
+#### Aktifkan dan Jalankan Service Otomatis
+```bash
+sudo systemctl daemon-reload
 sudo systemctl enable --now laravel
-Cek Status Servicesudo systemctl status laravel
-Jika berhasil, status akan menunjukkan: Active: active (running).Perintah Pengelolaan Service & LogKebutuhanPerintahMelihat log langsungsudo journalctl -u laravel -fRestart Laravelsudo systemctl restart laravelStop Laravelsudo systemctl stop laravelStart Laravelsudo systemctl start laravelCek Port 8000sudo ss -lntp | grep :8000Nonaktifkan Auto-Startsudo systemctl disable laravel3. Konfigurasi Akses Browser & Network SecurityPastikan Security Group EC2 mengizinkan inbound TCP port 8000 dari IP publik.Akses aplikasi melalui browser:http://32.236.168.110:8000/
-Catatan: php artisan serve merupakan development server Laravel. Untuk lingkungan produksi skala penuh, direkomendasikan menggunakan Nginx/Apache dengan PHP-FPM.4. Cloning & Konfigurasi AplikasiKloning repository dari Git ke direktori server EC2.Install pustaka backend & frontend:composer install --no-dev
-npm install && npm run build
-Konfigurasi file .env produksi di server.Buat symbolic link storage:php artisan storage:link
-5. Koneksi Elastic IP & Domain / SSLMengasosiasikan Elastic IP (IP Publik Statis AWS) ke instans EC2 agar alamat IP tidak berubah saat instans di-restart.Mengarahkan DNS Domain ke Elastic IP dan mengonfigurasi SSL (Certbot / AWS Certificate Manager).📁 Struktur Folder Projectgeek-store/
+```
+
+#### Cek Status Service
+```bash
+sudo systemctl status laravel
+```
+*Jika berhasil, status akan menunjukkan: `Active: active (running)`.*
+
+#### Perintah Pengelolaan Service & Log
+| Kebutuhan | Perintah |
+| :--- | :--- |
+| **Melihat log langsung** | `sudo journalctl -u laravel -f` |
+| **Restart Laravel** | `sudo systemctl restart laravel` |
+| **Stop Laravel** | `sudo systemctl stop laravel` |
+| **Start Laravel** | `sudo systemctl start laravel` |
+| **Cek Port 8000** | `sudo ss -lntp \| grep :8000` |
+| **Nonaktifkan Auto-Start** | `sudo systemctl disable laravel` |
+
+---
+
+### 3. Konfigurasi Akses Browser & Network Security
+- Pastikan Security Group EC2 mengizinkan inbound TCP port 8000 dari IP publik.
+- Akses aplikasi melalui browser:
+  ```text
+  http://32.236.168.110:8000/
+  ```
+> **Catatan:** `php artisan serve` merupakan development server Laravel. Untuk lingkungan produksi skala penuh, direkomendasikan menggunakan Nginx/Apache dengan PHP-FPM.
+
+---
+
+### 4. Cloning & Konfigurasi Aplikasi
+1. Kloning repository dari Git ke direktori server EC2.
+2. Install pustaka backend & frontend:
+   ```bash
+   composer install --no-dev
+   npm install && npm run build
+   ```
+3. Konfigurasi file `.env` produksi di server.
+4. Buat symbolic link storage:
+   ```bash
+   php artisan storage:link
+   ```
+
+---
+
+### 5. Koneksi Elastic IP & Domain / SSL
+- Mengasosiasikan **Elastic IP** (IP Publik Statis AWS) ke instans EC2 agar alamat IP tidak berubah saat instans di-restart.
+- Mengarahkan DNS Domain ke Elastic IP dan mengonfigurasi SSL (Certbot / AWS Certificate Manager).
+
+---
+
+## 📁 Struktur Folder Project
+
+```text
+geek-store/
 ├── app/                                          # [BACKEND & LOGIK APLIKASI]
 │   ├── Http/
 │   │   ├── Controllers/
@@ -31,7 +126,7 @@ Konfigurasi file .env produksi di server.Buat symbolic link storage:php artisan 
 │   │   │   │   ├── CategoryController.php        # Resource management kategori
 │   │   │   │   ├── ColorController.php           # Resource management warna produk
 │   │   │   │   ├── DashboardController.php       # Dashboard statistik & transaksi admin
-│   │   │   │   ├── PermissionController.php     # Management permission (Spatie)
+│   │   │   │   ├── PermissionController.php      # Management permission (Spatie)
 │   │   │   │   ├── ProductController.php         # Resource management produk & galeri gambar
 │   │   │   │   ├── RoleController.php            # Management role (Admin & Customer)
 │   │   │   │   ├── SliderController.php          # Resource management slider banner
@@ -197,7 +292,69 @@ Konfigurasi file .env produksi di server.Buat symbolic link storage:php artisan 
 └── routes/                                       # [ROUTING DEFINITIONS]
     ├── console.php                               # Scheduled commands / Artisan CLI routes
     └── web.php                                   # Routing utama (Public, Auth, Customer & Admin)
-✨ List Fitur AplikasiAplikasi 2R STORE terbagi menjadi dua sisi utama: Customer (Web Public) dan Dashboard Admin.1. Fitur Sisi Customer (Web Public Storefront)E-Katalog & Pencarian Produk:Menampilkan katalog produk terbaru, rekomendasi, dan slider banner di halaman utama.Filter produk berdasarkan Kategori (Categories) dan pencarian kata kunci (Search).Detail produk lengkap beserta harga, varian (warna), deskripsi, dan stok.Keranjang Belanja (Cart Management):Tambah produk ke keranjang belanja.Update kuantitas item dan hapus item dari keranjang.Proses Checkout & Hitung Ongkir Otomatis:Integrasi API RajaOngkir untuk memilih Kota, Kecamatan, dan kalkulasi biaya pengiriman secara real-time.Multi-Payment Gateway Integration:Integrasi Duitku Sandbox untuk pembayaran instan (Virtual Account/VA, Credit Card, dll.).Generasi otomatis invoice dan kode bayar (payment_url).Manajemen Akun & Transaksi Customer:Autentikasi (Registrasi Akun Baru, Login, & Logout).Halaman "Pesanan Saya" (/my-orders) untuk memantau status pesanan (UNPAID, PAID, EXPIRED, CANCELLED).Detail invoice dan rincian produk yang dibeli beserta tombol bayar langsung via Duitku.2. Fitur Sisi Dashboard AdminAkses Login Admin:URL: http://ec2-32-236-168-110.ap-southeast-2.compute.amazonaws.com:8000/loginUsername: admin@gmail.comPassword: passwordAutentikasi & Proteksi Akses (RBAC):Restriksi rute dashboard (/account/dashboard) khusus role Administrator menggunakan Spatie Laravel-Permission & Middleware.Pengalihan (redirect) otomatis untuk user non-admin / customer yang mencoba mengakses area sensitif.Analitik & Dashboard Ringkasan:Ringkasan statistik jumlah transaksi (UNPAID, PAID, EXPIRED, CANCELLED).Grafik/Chart laporan pendapatan bulanan transaksi berstatus PAID.Manajemen Transaksi Customer (Order Management):Transparansi melihat seluruh transaksi dari semua customer.Tab filter status transaksi cepat (Semua Status, UNPAID, PAID, EXPIRED, CANCELLED).Fitur pencarian transaksi berdasarkan Nomor Invoice.Halaman detail transaksi customer (item yang dibeli, alamat pengiriman, dan status pembayaran).Manajemen Produk & Katalog (CRUD):Categories Management: Tambah, ubah, hapus, dan atur kategori produk.Products Management: Kelola data produk (nama, deskripsi, harga, stok, varian warna, dan gambar produk).Colors Management: Tambah dan atur varian warna produk.Sliders Management: Kelola gambar banner promosi di halaman utama toko.Manajemen Pengguna & Hak Akses (User & Security Management):Users Management: Kelola data pengguna/pelanggan dan penetapan role.Roles & Permissions Management: Atur peran user dan hak akses fitur secara dinamis menggunakan Spatie Permission.🚀 Alur Deployment ke GitHubPerintah Git yang digunakan saat melakukan pembaruan file dan pengunggahan kode ke repository GitHub origin/main:# 1. Cek status perubahan file di terminal EC2
+```
+
+---
+
+## ✨ List Fitur Aplikasi
+
+Aplikasi **2R STORE** terbagi menjadi dua sisi utama: **Customer (Web Public)** dan **Dashboard Admin**.
+
+### 1. Fitur Sisi Customer (Web Public Storefront)
+- **E-Katalog & Pencarian Produk**:
+  - Menampilkan katalog produk terbaru, rekomendasi, dan slider banner di halaman utama.
+  - Filter produk berdasarkan Kategori (*Categories*) dan pencarian kata kunci (*Search*).
+  - Detail produk lengkap beserta harga, varian (warna), deskripsi, dan stok.
+- **Keranjang Belanja (Cart Management)**:
+  - Tambah produk ke keranjang belanja.
+  - Update kuantitas item dan hapus item dari keranjang.
+- **Proses Checkout & Hitung Ongkir Otomatis**:
+  - Integrasi API **RajaOngkir** untuk memilih Kota, Kecamatan, dan kalkulasi biaya pengiriman secara real-time.
+- **Multi-Payment Gateway Integration**:
+  - Integrasi **Duitku Sandbox** untuk pembayaran instan (Virtual Account/VA, Credit Card, dll.).
+  - Generasi otomatis invoice dan kode bayar (`payment_url`).
+- **Manajemen Akun & Transaksi Customer**:
+  - Autentikasi (Registrasi Akun Baru, Login, & Logout).
+  - Halaman **"Pesanan Saya"** (`/my-orders`) untuk memantau status pesanan (`UNPAID`, `PAID`, `EXPIRED`, `CANCELLED`).
+  - Detail invoice dan rincian produk yang dibeli beserta tombol bayar langsung via Duitku.
+
+---
+
+### 2. Fitur Sisi Dashboard Admin
+
+> **Akses Login Admin:**
+> - **URL**: `http://ec2-32-236-168-110.ap-southeast-2.compute.amazonaws.com:8000/login`
+> - **Username**: `admin@gmail.com`
+> - **Password**: `password`
+
+- **Autentikasi & Proteksi Akses (RBAC)**:
+  - Restriksi rute dashboard (`/account/dashboard`) khusus role Administrator menggunakan Spatie Laravel-Permission & Middleware.
+  - Pengalihan (*redirect*) otomatis untuk user non-admin / customer yang mencoba mengakses area sensitif.
+- **Analitik & Dashboard Ringkasan**:
+  - Ringkasan statistik jumlah transaksi (`UNPAID`, `PAID`, `EXPIRED`, `CANCELLED`).
+  - Grafik/Chart laporan pendapatan bulanan transaksi berstatus `PAID`.
+- **Manajemen Transaksi Customer (Order Management)**:
+  - Transparansi melihat seluruh transaksi dari semua customer.
+  - Tab filter status transaksi cepat (Semua Status, `UNPAID`, `PAID`, `EXPIRED`, `CANCELLED`).
+  - Fitur pencarian transaksi berdasarkan Nomor Invoice.
+  - Halaman detail transaksi customer (item yang dibeli, alamat pengiriman, dan status pembayaran).
+- **Manajemen Produk & Katalog (CRUD)**:
+  - **Categories Management**: Tambah, ubah, hapus, dan atur kategori produk.
+  - **Products Management**: Kelola data produk (nama, deskripsi, harga, stok, varian warna, dan gambar produk).
+  - **Colors Management**: Tambah dan atur varian warna produk.
+  - **Sliders Management**: Kelola gambar banner promosi di halaman utama toko.
+- **Manajemen Pengguna & Hak Akses (User & Security Management)**:
+  - **Users Management**: Kelola data pengguna/pelanggan dan penetapan role.
+  - **Roles & Permissions Management**: Atur peran user dan hak akses fitur secara dinamis menggunakan Spatie Permission.
+
+---
+
+## 🚀 Alur Deployment ke GitHub
+
+Perintah Git yang digunakan saat melakukan pembaruan file dan pengunggahan kode ke repository GitHub `origin/main`:
+
+```bash
+# 1. Cek status perubahan file di terminal EC2
 git status
 
 # 2. Stage seluruh perubahan file
@@ -212,3 +369,4 @@ git remote -v
 # 5. Pastikan berada di branch main & Push ke GitHub
 git branch -M main
 git push -u origin main
+```
