@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presentasi UAS WAD - 2R STORE</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+      <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            color: #f0f0f0;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            overflow: hidden; z-index: -1; pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            background-color: rgba(64, 224, 208, 0.2);
+            border-radius: 50%;
+            animation: particle-float 15s infinite linear;
+        }
+        
+        @keyframes particle-float {
+            0% { transform: translateY(100vh) translateX(0); }
+            100% { transform: translateY(-100px) translateX(100px); }
+        }
+
+        .slides-container {
+            position: relative;
+            width: 100%; max-width: 1200px; height: 100%;
+            margin: 0 auto; padding: 20px;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            padding: 40px 60px;
+            display: flex; flex-direction: column; justify-content: center;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(20px);
+        }
+
+        .slide.active {
+            opacity: 1; visibility: visible; transform: translateY(0);
+        }
+
+        .slide-content {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .slide-content::-webkit-scrollbar { width: 8px; }
+        .slide-content::-webkit-scrollbar-track { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .slide-content::-webkit-scrollbar-thumb { background: #40e0d0; border-radius: 10px; }
+
+        .slide-title {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #40e0d0, #20b2aa, #00ced1);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+            text-align: center;
+            border-bottom: 2px solid rgba(64, 224, 208, 0.3);
+            padding-bottom: 15px;
+        }
+
+        .slide h3 {
+            color: #40e0d0; margin-top: 25px; margin-bottom: 15px; font-size: 1.4rem;
+        }
+
+        .slide p, .slide li {
+            color: #ddd; line-height: 1.8; margin-bottom: 10px; font-size: 1.05rem;
+        }
+
+        .slide ul, .slide ol { margin-left: 25px; margin-bottom: 20px; }
+        .slide strong { color: #fff; }
+
+        /* Gaya untuk Link */
+        .slide a {
+            color: #40e0d0;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .slide a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+
+        .code-block {
+            background: #1e1e1e; border-left: 4px solid #40e0d0;
+            padding: 15px; border-radius: 8px;
+            font-family: 'Courier New', Courier, monospace; color: #a9b7c6;
+            overflow-x: auto; margin: 15px 0; font-size: 0.9rem;
+        }
+
+        /* Grid untuk Slide 9 */
+        .deployment-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .deployment-card {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        .deployment-card h4 {
+            color: #20b2aa;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        .deployment-card p {
+            font-size: 0.95rem;
+            margin-bottom: 5px;
+        }
+
+        /* Cover Slide */
+        .cover-slide {
+            text-align: center; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; height: 100%;
+        }
+        .logo-container {
+            margin-bottom: 30px; width: 150px; height: 150px;
+            animation: float 6s ease-in-out infinite;
+        }
+        .logo {
+            width: 100%; height: 100%; border-radius: 50%;
+            object-fit: cover; border: 5px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 30px rgba(64, 224, 208, 0.5);
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .cover-title {
+            font-size: 3rem; margin-bottom: 15px;
+            background: linear-gradient(to right, #40e0d0, #20b2aa, #00ced1);
+            -webkit-background-clip: text; background-clip: text; color: transparent;
+        }
+        .cover-subtitle { font-size: 1.2rem; color: #b0e0e6; margin-bottom: 40px; max-width: 800px; }
+        .author-info {
+            background: rgba(255, 255, 255, 0.1); border-radius: 15px;
+            padding: 20px 40px; backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .author-info p { font-size: 1.1rem; margin: 5px 0; }
+
+        /* Navigasi Bawah */
+        .navigation {
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; gap: 20px; z-index: 1000;
+            background: rgba(0, 0, 0, 0.5); padding: 10px 25px; border-radius: 50px;
+            backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .nav-btn {
+            background: linear-gradient(to right, #40e0d0, #20b2aa);
+            color: #0f2027; border: none; padding: 10px 25px; border-radius: 30px;
+            font-weight: bold; font-size: 1rem; cursor: pointer;
+            transition: all 0.3s ease; box-shadow: 0 5px 15px rgba(64, 224, 208, 0.4);
+            display: flex; align-items: center; gap: 10px;
+        }
+        .nav-btn:hover:not(:disabled) { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(64, 224, 208, 0.6); }
+        .nav-btn:disabled { background: #555; color: #888; cursor: not-allowed; box-shadow: none; }
+        .slide-counter { font-size: 1.2rem; color: #fff; font-weight: bold; }
+
+        /* Iframe Zoom */
+        .iframe-wrapper {
+            position: relative; margin-top: 30px; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2); background: #1e1e1e;
+            overflow: hidden; display: flex; flex-direction: column;
+        }
+        .iframe-controls {
+            display: flex; gap: 10px; padding: 10px;
+            background: rgba(0, 0, 0, 0.5); border-bottom: 1px solid rgba(255,255,255,0.1);
+            z-index: 10;
+        }
+        .ctrl-btn {
+            background: rgba(64, 224, 208, 0.2); color: #40e0d0;
+            border: 1px solid #40e0d0; padding: 5px 12px; border-radius: 5px;
+            cursor: pointer; font-size: 0.9rem; transition: all 0.3s;
+        }
+        .ctrl-btn:hover { background: #40e0d0; color: #0f2027; }
+        .iframe-scroll-area {
+            width: 100%; height: 500px; overflow: auto; background: #ffffff;
+        }
+        .iframe-wrapper:fullscreen { width: 100vw; height: 100vh; border-radius: 0; margin: 0; }
+        .iframe-wrapper:fullscreen .iframe-scroll-area { height: calc(100vh - 50px); }
+        .iframe-scroll-area::-webkit-scrollbar { width: 10px; height: 10px; }
+        .iframe-scroll-area::-webkit-scrollbar-track { background: #f1f1f1; }
+        .iframe-scroll-area::-webkit-scrollbar-thumb { background: #888; border-radius: 5px; }
+        .iframe-scroll-area::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        @media (max-width: 768px) {
+            .slide { padding: 20px; }
+            .slide-content { padding: 20px; max-height: 75vh; }
+            .cover-title { font-size: 2rem; }
+            .cover-subtitle { font-size: 1rem; }
+            .slide-title { font-size: 1.8rem; }
+            .nav-btn { padding: 8px 15px; font-size: 0.9rem; }
+            .navigation { gap: 10px; bottom: 15px; }
+            .logo-container { width: 100px; height: 100px; }
+            .iframe-controls { flex-wrap: wrap; }
+            .deployment-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="slides-container">
+        
+        <!-- SLIDE 1: COVER / JUDUL -->
+        <div class="slide active">
+            <div class="cover-slide">
+                <!-- LOGO CAKRWALA UNIVERSITY -->
+                <div class="logo-container">
+                    <img src="cakrwala-university.jpeg" alt="Logo Cakrwala University" class="logo">
+                </div>
+                
+                <h1 class="cover-title">Laporan Proyek UAS WAD<br>2R STORE</h1>
+                <p class="cover-subtitle">Implementasi Laravel , Inertia.js dan React.js pada Sistem E-Commerce 2R STORE.</p>
+                
+                <div class="author-info">
+                    <p><strong>Nama:</strong> Dimas Kurniawan</p>
+                    <p><strong>NIM:</strong> 25120300016</p>
+                    <p><strong>Mata Kuliah:</strong> Web Advanced Development (WAD)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 2: ALUR KERJA MVC (1) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Alur Kerja MVC (Request Life Cycle)</h2>
+                <p>Siklus permintaan (request life cycle) dari pengguna hingga data berhasil disimpan di basis data menggunakan arsitektur MVC dengan kombinasi Inertia.js:</p>
+                <div class="code-block">
+[Browser / React View] ---> (HTTPS Request) ---> [Laravel Router]
+                                                         |
+[Database / Eloquent Model] <--- (Logic & DB) <--- [Controller]
+                </div>
+
+                <h3>Tahap 1: Interaksi di View (Frontend React)</h3>
+                <ul>
+                    <li><strong>User Action:</strong> Pengguna menekan tombol "BAYAR SEKARANG" di halaman checkout (<code>resources/js/Pages/Web/Checkouts/Index.jsx</code>).</li>
+                    <li><strong>State & Event Handler:</strong> Elemen form memicu fungsi <code>storeCheckout()</code>. Fungsi ini mengumpulkan data state alamat, ongkir, serta <code>payment_method</code>.</li>
+                    <li><strong>Inertia Request:</strong> Inertia mengirimkan HTTP POST request berisi payload JSON ke rute <code>/checkouts</code> backend tanpa memuat ulang (reload) seluruh halaman.</li>
+                </ul>
+
+                <h3>Tahap 2: Routing & Control (Laravel Controller)</h3>
+                <ul>
+                    <li><strong>Routing:</strong> <code>routes/web.php</code> mengarahkan HTTP POST <code>/checkouts</code> ke method <code>store()</code> di <code>CheckoutController.php</code>.</li>
+                    <li><strong>Validation & Security:</strong> Controller memvalidasi parameter (province_id, city_id, dll) dan menghitung ulang harga dari database untuk mencegah manipulasi (price tampering).</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- SLIDE 3: ALUR KERJA MVC (2) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Alur Kerja MVC (Lanjutan)</h2>
+                
+                <h3>Tahap 2 (Lanjutan): Integrasi Payment Gateway</h3>
+                <ul>
+                    <li>Controller membuat Signature MD5 Duitku, menyusun payload transaksi, dan mengirim request via HTTP Client ke API Endpoint Duitku Sandbox.</li>
+                </ul>
+
+                <h3>Tahap 3: Interaksi dengan Model & Database</h3>
+                <ul>
+                    <li><strong>Database Transaction:</strong> Jika API Duitku merespons sukses (<code>statusCode == '00'</code>), Controller membuka transaksi basis data (<code>DB::transaction</code>).</li>
+                    <li>Model <code>Invoice</code> menyimpan data transaksi baru (status UNPAID, detail pengiriman, dan paymentUrl dari Duitku).</li>
+                    <li>Model <code>Cart</code> menghapus (delete) item keranjang belanja milik user tersebut.</li>
+                </ul>
+
+                <h3>Tahap 4: Respons Kembali ke View</h3>
+                <ul>
+                    <li><strong>Inertia Location Redirect:</strong> Controller mengembalikan respons <code>Inertia::location($result['paymentUrl'])</code>.</li>
+                    <li><strong>Browser Navigation:</strong> Browser secara otomatis mengalihkan halaman pengguna dari 2R STORE menuju halaman transaksi Sandbox Duitku.</li>
+                </ul>
+            </div>
+        </div>
+
+       <!-- SLIDE 4: CUSTOMER JOURNEY (DENGAN IFRAME ZOOM) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Alur Diagram Customer (Customer Journey)</h2>
+                <ol>
+                    <li><strong>Pemilihan Produk:</strong> Customer memilih produk, variasi Warna, Ukuran, dan Jumlah (Qty).</li>
+                    <li><strong>Autentikasi Pengguna (Guest Guard):</strong> Saat klik "Add to Cart", sistem mengecek login. Jika belum, diarahkan ke Login / Register. Setelah sukses, kembali ke Home.</li>
+                    <li><strong>Manajemen Keranjang Belanja:</strong> Customer dapat mengubah jumlah pesanan atau menghapus produk di halaman keranjang.</li>
+                    <li><strong>Proses Pengiriman (RajaOngkir):</strong> Di halaman Checkout, customer memilih Provinsi → Kota → Kecamatan. Sistem memanggil API RajaOngkir untuk tarif ongkir real-time (JNE, POS, J&T, Ninja).</li>
+                    <li><strong>Pembayaran Gateway (Sandbox Duitku):</strong> Customer mengisi alamat, menekan "BAYAR SEKARANG". Sistem membuat invoice dan mengarahkan ke gateway Sandbox Duitku (Virtual Account/Credit Card).</li>
+                </ol>
+
+                <!-- KONTROL IFRAME & ZOOM -->
+                <div class="iframe-wrapper" id="iframeWrapper">
+                    <div class="iframe-controls">
+                        <button class="ctrl-btn" onclick="zoomIframe(0.1)"><i class="fas fa-search-plus"></i> Zoom In</button>
+                        <button class="ctrl-btn" onclick="zoomIframe(-0.1)"><i class="fas fa-search-minus"></i> Zoom Out</button>
+                        <button class="ctrl-btn" onclick="resetZoom()"><i class="fas fa-sync"></i> Reset</button>
+                        <button class="ctrl-btn" onclick="toggleFullscreen()"><i class="fas fa-expand"></i> Fullscreen</button>
+                    </div>
+                    
+                    <div class="iframe-scroll-area" id="iframeScrollArea">
+                        <iframe id="diagramIframe" frameborder="0" style="width:100%;height:823px;transform-origin: top left; transition: transform 0.2s;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&page-id=gI7nfXSnZILyY0NKBD0x&dark=auto#G161fR3Y2WsX73pEmoTMk8C21-3HaH-HM_"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+     
+
+      
+        <!-- SLIDE 5: DATABASE & ERD (DENGAN IFRAME ZOOM) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Desain Basis Data (ERD & Relasi Tabel)</h2>
+                <p><strong>Relasi One-to-Many (1:N): Categories & Products</strong></p>
+                <p><em>Alasan:</em> Sebuah produk (misal: Jaket Parka) hanya dikategorikan ke dalam 1 kategori spesifik. Namun, 1 kategori dapat menampung banyak produk berbeda.</p>
+                
+                <h3>Implementasi Migration (Foreign Key)</h3>
+                <div class="code-block">
+Schema::create('products', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('category_id')->constrained('categories')->onDelete('cascade');
+    $table->string('title');
+    $table->bigInteger('price');
+    $table->timestamps();
+});
+                </div>
+
+                <h3>Pemanggilan Data Relasional (Eloquent ORM)</h3>
+                <div class="code-block">
+// Model Product
+public function category() {
+    return $this->belongsTo(Category::class);
+}
+// Eager Loading (Mencegah N+1 Problem)
+$products = Product::with(['category', 'colors'])->latest()->paginate(10);
+                </div>
+
+                <!-- KONTROL IFRAME & ZOOM SLIDE 5 -->
+                <div class="iframe-wrapper" id="iframeWrapper5">
+                    <div class="iframe-controls">
+                        <button class="ctrl-btn" onclick="zoomIframe5(0.1)"><i class="fas fa-search-plus"></i> Zoom In</button>
+                        <button class="ctrl-btn" onclick="zoomIframe5(-0.1)"><i class="fas fa-search-minus"></i> Zoom Out</button>
+                        <button class="ctrl-btn" onclick="resetZoom5()"><i class="fas fa-sync"></i> Reset</button>
+                        <button class="ctrl-btn" onclick="toggleFullscreen5()"><i class="fas fa-expand"></i> Fullscreen</button>
+                    </div>
+                    
+                    <div class="iframe-scroll-area" id="iframeScrollArea5">
+                        <iframe id="diagramIframe5" frameborder="0" style="width:100%;height:1370px;transform-origin: top left; transition: transform 0.2s;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&page-id=pCmluWbScpG6waFknh6l&dark=auto#G161fR3Y2WsX73pEmoTMk8C21-3HaH-HM_"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6: KEAMANAN WEB (XSS) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Keamanan Web (Pencegahan XSS)</h2>
+                <h3>Cross-Site Scripting (XSS)</h3>
+                <p>Serangan menyisipkan skrip berbahaya via input form yang dieksekusi di browser pengguna lain.</p>
+                
+                <ul>
+                    <li><strong>Frontend (React Auto-Escaping):</strong> React secara default memperlakukan nilai variabel di dalam kurung kurawal JSX <code>{ variable }</code> sebagai plain text. String seperti <code>&lt;script&gt;alert('XSS')&lt;/script&gt;</code> otomatis di-escape menjadi entitas HTML aman.</li>
+                    <li><strong>Backend (Sanitasi Input):</strong> Server memvalidasi data input melalui <code>$request->validate([...])</code> sebelum diproses.</li>
+                    <li><strong>Cookies & Session Protection:</strong> Status autentikasi disimpan dalam cookie HTTP-Only dan SameSite. Skrip jahat tidak dapat membaca token sesi via <code>document.cookie</code>.</li>
+                </ul>
+
+                <div class="code-block">
+// config/session.php
+'http_only' => env('SESSION_HTTP_ONLY', true),
+'same_site' => env('SESSION_SAME_SITE', 'lax'),
+'secure' => env('SESSION_SECURE_COOKIE'),
+                </div>
+            </div>
+        </div>
+
+             <!-- SLIDE 7: KEAMANAN WEB (SQL INJECTION) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Keamanan Web (Pencegahan SQL Injection)</h2>
+                <p>SQL Injection terjadi ketika penyerang memasukkan kueri SQL berbahaya ke dalam kolom input untuk memanipulasi database.</p>
+                <h3>Solusi: Eloquent ORM & PDO Parameter Binding</h3>
+                <p>Nilai input dikirim terpisah dari struktur perintah SQL. Karakter khusus SQL seperti <code>' OR '1'='1</code> dianggap sebagai string biasa.</p>
+                <div class="code-block">
+// Input dimasukkan melalui PDO Prepared Statement
+Product::create([
+    'category_id' => $request->category_id,
+    'title' => $request->title,
+    'price' => $request->price,
+]);
+                </div>
+                <h3>Ringkasan Lapisan Keamanan</h3>
+                <table class="data-table" style="width:100%; border-collapse:collapse; margin-top:10px; background:rgba(0,0,0,0.2);">
+                    <tr style="background:rgba(64,224,208,0.2);"><th style="padding:10px; border:1px solid rgba(255,255,255,0.1);">Serangan</th><th style="padding:10px; border:1px solid rgba(255,255,255,0.1);">Proteksi</th><th style="padding:10px; border:1px solid rgba(255,255,255,0.1);">Implementasi</th></tr>
+                    <tr><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">XSS</td><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">JSX Auto-Escaping</td><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">React.js & Cookie HttpOnly</td></tr>
+                    <tr><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">SQL Injection</td><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">Prepared Statements</td><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">Eloquent ORM</td></tr>
+                    <tr><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">CSRF</td><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">CSRF Token</td><td style="padding:10px; border:1px solid rgba(255,255,255,0.1);">bootstrap/app.php</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- SLIDE 8: AUTENTIKASI & SESSION -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Logika Autentikasi & Session</h2>
+                <ol>
+                    <li><strong>Pengiriman Request:</strong> Input email & password dari React dikirim via POST ke <code>/login</code>.</li>
+                    <li><strong>Validasi Request:</strong> Input divalidasi dengan <code>$request->validate()</code>.</li>
+                    <li><strong>Pemeriksaan Kredensial (Bcrypt):</strong> Menggunakan <code>Auth::attempt()</code>. Password dicocokkan dengan hash di database menggunakan Bcrypt (<code>Hash::check()</code>).</li>
+                </ol>
+
+                <h3>Penyimpanan Session Secara Aman</h3>
+                <ul>
+                    <li><strong>Server-side Session:</strong> Tidak menggunakan JWT di local storage (rentan XSS).</li>
+                    <li><strong>HTTP-Only Cookies:</strong> Mencegah JavaScript mengakses cookie sesi.</li>
+                    <li><strong>Regenerasi Session ID:</strong> <code>$request->session()->regenerate()</code> setiap login untuk mencegah Session Fixation.</li>
+                </ul>
+
+                <h3>Proteksi Hak Akses (Middleware)</h3>
+                <p>Halaman sensitif dilindungi middleware <code>auth</code>. Jika unauthorized, server redirect ke <code>/login</code>. Status user dibagikan ke React via <code>HandleInertiaRequests</code>.</p>
+            </div>
+        </div>
+
+           <!-- SLIDE 9: DEPLOYMENT AWS (DETAIL LENGKAP) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Deployment AWS EC2 (Infrastruktur & Load Balancing)</h2>
+                
+                <div class="deployment-grid">
+                    <!-- Bagian Kiri -->
+                    <div>
+                        <div class="deployment-card">
+                            <h4>1. Provisioning & Security Group</h4>
+                            <p>Membuat instans EC2 (Amazon Linux 2023). Mengonfigurasi Security Group (Firewall):</p>
+                            <ul style="margin-bottom:0; font-size:0.9rem;">
+                                <li><strong>Port 22 (SSH):</strong> Terbatas IP Pengembang.</li>
+                                <li><strong>Port 8000 (HTTP) & 443 (HTTPS):</strong> Terbuka (0.0.0.0/0).</li>
+                                <li><strong>Port 5177 (Vite) & 3306 (MySQL):</strong> Untuk layanan tambahan.</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="deployment-card" style="margin-top:15px;">
+                            <h4>2. Create AMI Image</h4>
+                            <p>Membuat Amazon Machine Image untuk *backup* dan replikasi *instance*:</p>
+                            <p style="margin-bottom:0;"><strong>Nama:</strong> ami-app-web-v1<br><strong>AMI ID:</strong> ami-02ed7bbd831e5a74d</p>
+                        </div>
+                    </div>
+
+                    <!-- Bagian Kanan -->
+                    <div>
+                        <div class="deployment-card">
+                            <h4>3. Create Target Group</h4>
+                            <p>Membuat Target Group untuk mendistribusikan trafik dari Load Balancer ke Instance:</p>
+                            <p style="margin-bottom:0;"><strong>Nama:</strong> tg-app-web<br><strong>Port:</strong> 8000 (HTTP)<br><strong>Target Type:</strong> Instance<br><strong>Load Balancer:</strong> alb-app-web</p>
+                        </div>
+
+                        <div class="deployment-card" style="margin-top:15px;">
+                            <h4>4. Create Load Balancing</h4>
+                            <p>Membuat Application Load Balancer (ALB) untuk *high availability*:</p>
+                            <p style="margin-bottom:0;"><strong>Nama:</strong> alb-app-web<br><strong>Scheme:</strong> Internet-facing<br><strong>IP Type:</strong> IPv4<br><strong>Availability Zones:</strong> 2 (High Availability)</p>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>5. Cloning Repository & Build</h3>
+                <ul>
+                    <li><strong>Link Repository:</strong> <a href="https://github.com/dimask016/project_uas_eligible" target="_blank">https://github.com/dimask016/project_uas_eligible</a></li>
+                    <li><strong>Build & Instalasi:</strong> <code>composer install --no-dev</code> dan <code>npm install && npm run build</code>.</li>
+                </ul>
+
+                <h3>6. Buat service systemd</h3>
+                <p>Buka file service:</p>
+                <div class="code-block">
+sudo nano /etc/systemd/system/laravel.service
+                </div>
+                <p>Masukkan konfigurasi berikut:</p>
+                <div class="code-block">
+[Unit]
+Description=Laravel Artisan Development Server
+After=network.target
+
+[Service]
+User=ec2-user
+WorkingDirectory=/home/ec2-user/docker_web
+ExecStart=/usr/bin/php artisan serve --host=0.0.0.0 --port=8000
+Restart=always
+                </div>
+                <p>Aktifkan dan cek status service:</p>
+                <div class="code-block">
+sudo systemctl daemon-reload
+sudo systemctl enable --now laravel
+sudo systemctl status laravel
+                </div>
+                
+                <h3>7. Akses Web & Database</h3>
+                <ul>
+                    <li><strong>Akses Web:</strong> <code>ec2-32-236-168-110.ap-southeast-2.compute.amazonaws.com:8000</code></li>
+                    <li><strong>Load Balancing App:</strong> <code>alb-app-web-1871278509.ap-southeast-2.elb.amazonaws.com</code></li>
+                    <li><strong>Database:</strong> <code>ec2-13-210-247-47.ap-southeast-2.compute.amazonaws.com</code></li>
+                </ul>
+            </div>
+        </div>
+
+         <!-- SLIDE 10: DIAGRAM DEPLOYMENT (IFRAME BARU) -->
+        <div class="slide">
+            <div class="slide-content">
+                <h2 class="slide-title">Arsitektur Deployment AWS</h2>
+                <p>Diagram berikut mengilustrasikan alur arsitektur dan koneksi antar layanan AWS yang telah dikonfigurasi.</p>
+                
+                <div class="iframe-wrapper" id="iframeWrapper10">
+                    <div class="iframe-controls">
+                        <button class="ctrl-btn" onclick="zoomIframe10(0.1)"><i class="fas fa-search-plus"></i> Zoom In</button>
+                        <button class="ctrl-btn" onclick="zoomIframe10(-0.1)"><i class="fas fa-search-minus"></i> Zoom Out</button>
+                        <button class="ctrl-btn" onclick="resetZoom10()"><i class="fas fa-sync"></i> Reset</button>
+                        <button class="ctrl-btn" onclick="toggleFullscreen10()"><i class="fas fa-expand"></i> Fullscreen</button>
+                    </div>
+                    <div class="iframe-scroll-area" id="iframeScrollArea10">
+                        <iframe id="diagramIframe10" frameborder="0" style="width:100%;height:503px;transform-origin: top left; transition: transform 0.2s;" src="https://viewer.diagrams.net/?tags=%7B%7D&lightbox=1&highlight=0000ff&edit=_blank&layers=1&nav=1&page-id=qKakisNPSKKYLsyU46Rl&dark=auto#G161fR3Y2WsX73pEmoTMk8C21-3HaH-HM_"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 11: PENUTUP -->
+        <div class="slide">
+            <div class="cover-slide">
+                <h1 class="cover-title">Terima Kasih</h1>
+                <p class="cover-subtitle">Laporan UAS Web Advanced Development - 2R STORE</p>
+                <div class="author-info">
+                    <p><strong>Dimas Kurniawan</strong></p>
+                    <p>NIM: 25120300016</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Tombol Navigasi Slide -->
+    <div class="navigation">
+        <button class="nav-btn" id="prevBtn" disabled>
+            <i class="fas fa-arrow-left"></i> Prev
+        </button>
+        <span class="slide-counter" id="slideCounter">1 / 11</span>
+        <button class="nav-btn" id="nextBtn">
+            Next <i class="fas fa-arrow-right"></i>
+        </button>
+    </div>
+
+    <script>
+        // --- SCRIPT PARTIKEL BACKGROUND ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                const size = Math.random() * 10 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}vw`;
+                particle.style.animationDuration = `${Math.random() * 20 + 10}s`;
+                particle.style.animationDelay = `${Math.random() * 5}s`;
+                particle.style.opacity = Math.random() * 0.3 + 0.1;
+                particlesContainer.appendChild(particle);
+            }
+        });
+
+        // --- SCRIPT LOGIKA NAVIGASI SLIDE ---
+        const slides = document.querySelectorAll('.slide');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const slideCounter = document.getElementById('slideCounter');
+        let currentSlide = 0;
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) { slide.classList.add('active'); }
+            });
+            slideCounter.textContent = `${currentSlide + 1} / ${slides.length}`;
+            prevBtn.disabled = currentSlide === 0;
+            nextBtn.disabled = currentSlide === slides.length - 1;
+        }
+
+        nextBtn.addEventListener('click', () => { if (currentSlide < slides.length - 1) { currentSlide++; updateSlide(); } });
+        prevBtn.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; updateSlide(); } });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' && currentSlide < slides.length - 1) { currentSlide++; updateSlide(); }
+            else if (e.key === 'ArrowLeft' && currentSlide > 0) { currentSlide--; updateSlide(); }
+        });
+        updateSlide();
+
+        // --- SCRIPT ZOOM SLIDE 4 ---
+        let currentZoom4 = 1;
+        function zoomIframe4(factor) {
+            currentZoom4 = Math.max(0.5, Math.min(3, currentZoom4 + factor));
+            const iframe = document.getElementById('diagramIframe4');
+            iframe.style.transform = `scale(${currentZoom4})`;
+            iframe.style.width = `${100 / currentZoom4}%`;
+            iframe.style.height = `${823 * currentZoom4}px`; 
+        }
+        function resetZoom4() {
+            currentZoom4 = 1;
+            const iframe = document.getElementById('diagramIframe4');
+            iframe.style.transform = `scale(1)`;
+            iframe.style.width = '100%';
+            iframe.style.height = '823px';
+        }
+        function toggleFullscreen4() {
+            const wrapper = document.getElementById('iframeWrapper4');
+            if (!document.fullscreenElement) wrapper.requestFullscreen().catch(err => alert(err.message));
+            else document.exitFullscreen();
+        }
+
+        // --- SCRIPT ZOOM SLIDE 5 ---
+        let currentZoom5 = 1;
+        function zoomIframe5(factor) {
+            currentZoom5 = Math.max(0.5, Math.min(3, currentZoom5 + factor));
+            const iframe = document.getElementById('diagramIframe5');
+            iframe.style.transform = `scale(${currentZoom5})`;
+            iframe.style.width = `${100 / currentZoom5}%`;
+            iframe.style.height = `${1370 * currentZoom5}px`; 
+        }
+        function resetZoom5() {
+            currentZoom5 = 1;
+            const iframe = document.getElementById('diagramIframe5');
+            iframe.style.transform = `scale(1)`;
+            iframe.style.width = '100%';
+            iframe.style.height = '1370px';
+        }
+        function toggleFullscreen5() {
+            const wrapper = document.getElementById('iframeWrapper5');
+            if (!document.fullscreenElement) wrapper.requestFullscreen().catch(err => alert(err.message));
+            else document.exitFullscreen();
+        }
+
+        // --- SCRIPT ZOOM SLIDE 10 ---
+        let currentZoom10 = 1;
+        function zoomIframe10(factor) {
+            currentZoom10 = Math.max(0.5, Math.min(3, currentZoom10 + factor));
+            const iframe = document.getElementById('diagramIframe10');
+            iframe.style.transform = `scale(${currentZoom10})`;
+            iframe.style.width = `${100 / currentZoom10}%`;
+            iframe.style.height = `${503 * currentZoom10}px`; 
+        }
+        function resetZoom10() {
+            currentZoom10 = 1;
+            const iframe = document.getElementById('diagramIframe10');
+            iframe.style.transform = `scale(1)`;
+            iframe.style.width = '100%';
+            iframe.style.height = '503px';
+        }
+        function toggleFullscreen10() {
+            const wrapper = document.getElementById('iframeWrapper10');
+            if (!document.fullscreenElement) wrapper.requestFullscreen().catch(err => alert(err.message));
+            else document.exitFullscreen();
+        }
+    </script>
+</body>
+</html>
