@@ -23,7 +23,22 @@ export default function ProductShow() {
 
     //define state
     const [colorID, setColorID] = useState('');
-    const [image, setImage] = useState('');
+    const [image, setImage] = useState(null);
+
+    // Helper URL Gambar (Mencegah double path & menangani hash file storage)
+    const getImageUrl = (imagePath, defaultFolder = 'products') => {
+        if (!imagePath) return '/images/placeholder.png';
+        if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) return imagePath;
+
+        // Clean prefix storage/
+        let cleanPath = imagePath.replace(/^\/?storage\//, '').replace(/\/storage\//, '/');
+
+        if (cleanPath.startsWith('products/') || cleanPath.startsWith('colors/')) {
+            return `/storage/${cleanPath}`;
+        }
+
+        return `/storage/${defaultFolder}/${cleanPath}`;
+    };
 
     //method storeImage
     const storeImage = async (e) => {
@@ -31,14 +46,11 @@ export default function ProductShow() {
 
         //sending data
         router.post('/account/products/store_image_product', {
-
-            //data
             image: image,
             color_id: colorID,
             product_id: product.id
         }, {
             onSuccess: () => {
-
                 //show alert
                 Swal.fire({
                     title: 'Success!',
@@ -48,12 +60,18 @@ export default function ProductShow() {
                     timer: 1500
                 });
 
-                //set state to null
+                //reset state and form input file
                 setImage(null);
                 setColorID('');
+                e.target.reset();
             }
         });
     }
+
+    const handleReset = () => {
+        setImage(null);
+        setColorID('');
+    };
 
     return (
         <>
@@ -68,11 +86,15 @@ export default function ProductShow() {
                                 <span className="font-weight-bold"><i className="fa fa-shopping-bag"></i> Upload Product Image</span>
                             </div>
                             <div className="card-body">
-                                <form onSubmit={storeImage}>
+                                <form onSubmit={storeImage} onReset={handleReset}>
 
                                     <div className="mb-3">
                                         <label className="form-label fw-bold">Image</label>
-                                        <input type="file" className="form-control" onChange={(e) => setImage(e.target.files[0])} />
+                                        <input 
+                                            type="file" 
+                                            className="form-control" 
+                                            onChange={(e) => setImage(e.target.files[0])} 
+                                        />
                                     </div>
                                     {errors.image && (
                                         <div className="alert alert-danger">
@@ -82,7 +104,11 @@ export default function ProductShow() {
 
                                     <div className="mb-3">
                                         <label className="form-label fw-bold">Color</label>
-                                        <select className="form-select" value={colorID} onChange={(e) => setColorID(e.target.value)}>
+                                        <select 
+                                            className="form-select" 
+                                            value={colorID} 
+                                            onChange={(e) => setColorID(e.target.value)}
+                                        >
                                             <option value="">-- Select Color --</option>
                                             {
                                                 colors.map((color) => (
@@ -116,39 +142,62 @@ export default function ProductShow() {
                             </div>
                             <div className="card-body">
                                 <div className="table-responsive">
-                                    <table className="table table-bordered table-striped table-hovered">
+                                    <table className="table table-bordered table-striped table-hovered align-middle">
                                         <thead>
                                             <tr>
-                                                <th scope="col" style={{ width: '5%' }}>No.</th>
-                                                <th scope="col" style={{ width: '20%' }}>Image</th>
-                                                <th scope="col" style={{ width: '15%' }}>Color</th>
-                                                <th scope="col" style={{ width: '15%' }}>Color Name</th>
-                                                <th scope="col" style={{ width: '15%' }}>Actions</th>
+                                                <th scope="col" style={{ width: '5%' }} className="text-center">No.</th>
+                                                <th scope="col" style={{ width: '20%' }} className="text-center">Image</th>
+                                                <th scope="col" style={{ width: '15%' }} className="text-center">Color</th>
+                                                <th scope="col" style={{ width: '15%' }} className="text-center">Color Name</th>
+                                                <th scope="col" style={{ width: '15%' }} className="text-center">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {product.product_images.data.map((image, index) => (
-                                                <tr key={index}>
-                                                    <td className="text-center">{++index + (product.product_images.current_page - 1) * product.product_images.per_page}</td>
-                                                    <td className="text-center">
-                                                        <img src={image.image} width={'200'} className="rounded-3" />
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <img src={image.color.image} width={'30'} className="rounded-circle" />
-                                                    </td>
-                                                    <td className="text-center">
-                                                        {image.color.name}
-                                                    </td>
-                                                    <td className="text-center">
-                                                        <Delete URL={'/account/products/destroy_image_product'} id={image.id} />
+                                            {product.product_images && product.product_images.data.length > 0 ? (
+                                                product.product_images.data.map((img, index) => (
+                                                    <tr key={index}>
+                                                        <td className="text-center">
+                                                            {++index + (product.product_images.current_page - 1) * product.product_images.per_page}
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <img 
+                                                                src={getImageUrl(img.image, 'products')} 
+                                                                width={'150'} 
+                                                                className="rounded-3 shadow-sm" 
+                                                                alt="Product"
+                                                            />
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <img 
+                                                                src={getImageUrl(img.color?.image, 'colors')} 
+                                                                width={'30'} 
+                                                                height={'30'}
+                                                                className="rounded-circle shadow-sm" 
+                                                                alt="Color Icon"
+                                                            />
+                                                        </td>
+                                                        <td className="text-center fw-bold">
+                                                            {img.color?.name || '-'}
+                                                        </td>
+                                                        <td className="text-center">
+                                                            <Delete URL={'/account/products/destroy_image_product'} id={img.id} />
+                                                        </td>
+                                                    </tr>
+                                                ))
+                                            ) : (
+                                                <tr>
+                                                    <td colSpan="5" className="text-center text-muted py-3">
+                                                        Belum ada gambar untuk produk ini.
                                                     </td>
                                                 </tr>
-                                            ))}
+                                            )}
                                         </tbody>
                                     </table>
                                 </div>
                                 
-                                <Pagination links={product.product_images.links} align={'end'}/>
+                                {product.product_images && (
+                                    <Pagination links={product.product_images.links} align={'end'}/>
+                                )}
 
                             </div>
                         </div>

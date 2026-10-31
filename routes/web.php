@@ -76,10 +76,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('account')->group(function () 
         Route::resource('/categories', AdminCategoryController::class, ['as' => 'account']);
     }
 
-// Colors Management
+    // Colors Management
     Route::resource('/colors', AdminColorController::class, ['as' => 'account']);
 
-
+    // Custom Image Product Routes (Wajib dideklarasikan SEBELUM Route::resource products)
+    Route::post('/products/store_image_product', [AdminProductController::class, 'storeImageProduct'])->name('account.products.store_image_product');
+    Route::post('/products/destroy_image_product', [AdminProductController::class, 'destroyImageProduct'])->name('account.products.destroy_image_product');
+    Route::delete('/products/destroy_image_product', [AdminProductController::class, 'destroyImageProduct']); // Support DELETE method
 
     // Products Management
     if (class_exists(AdminProductController::class)) {

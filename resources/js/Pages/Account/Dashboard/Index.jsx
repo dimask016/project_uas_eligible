@@ -1,50 +1,47 @@
-//import React
 import React from 'react';
-
-//import layout
 import LayoutAccount from '../../../Layouts/Account';
-
-//import component Head and usePage
 import { Head, usePage } from '@inertiajs/react';
-
-//import permissions
-import { hasAnyPermission } from '../../../Utils/Permissions';
-
-//import chart js
 import {
     Chart as ChartJS,
     CategoryScale,
     LinearScale,
-    PointElement,
-    LineElement,
+    BarElement,
     Title,
     Tooltip,
-    Filler,
     Legend,
 } from 'chart.js';
+import { Bar } from 'react-chartjs-2';
 
-//import react chart js
-import { Line } from 'react-chartjs-2';
-
-//register chart
+// Registrasi modul ChartJS
 ChartJS.register(
     CategoryScale,
     LinearScale,
-    PointElement,
-    LineElement,
+    BarElement,
     Title,
     Tooltip,
-    Filler,
     Legend
 );
 
 export default function Dashboard() {
+    const { count, chart, auth } = usePage().props;
 
-    //destruct props
-    const { auth, count, chart } = usePage().props;
+    // Konfigurasi Data Grafik Bar
+    const chartData = {
+        labels: chart?.labels || [],
+        datasets: [
+            {
+                label: 'REVENUE (Rp)',
+                data: chart?.revenues || [],
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
+            },
+        ],
+    };
 
-    //option chart
-    const options = {
+    // Konfigurasi Opsi Grafik
+    const chartOptions = {
         responsive: true,
         plugins: {
             legend: {
@@ -52,121 +49,93 @@ export default function Dashboard() {
             },
             title: {
                 display: true,
-                text: `STATISTIC REVENUE : ${new Date().getFullYear()}`,
+                text: `STATISTIC REVENUE : ${chart?.year || ''}`,
+            },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    callback: function (value) {
+                        return 'Rp. ' + value.toLocaleString('id-ID');
+                    },
+                },
             },
         },
     };
 
-    //data chart
-    const data = {
-        labels: chart.month_name,
-        datasets: [
-            {
-                fill: true,
-                label: 'REVENUE',
-                backgroundColor: '#bccad8',
-                data: chart.grand_total
-            },
-        ],
-    };
-
     return (
-        <>
+        <LayoutAccount>
             <Head>
                 <title>Dashboard - Geek Store</title>
             </Head>
-            <LayoutAccount>
-            
-                <div className="row mt-4">
-                    <div className="col-12 col-md-12 col-lg-12 mb-4">
-                        <div className="alert alert-success border-0 shadow-sm mb-0">
-                            Selamat Datang, <strong>{auth.user.name}</strong>
+
+            {/* Banner Welcome */}
+            <div className="alert alert-success border-0 shadow-sm mb-4">
+                Selamat Datang, <strong>{auth?.user?.name || 'Administrator'}</strong>
+            </div>
+
+            {/* Row Widget Status Transaksi */}
+            <div className="row mb-4">
+                <div className="col-md-3 col-6 mb-3">
+                    <div className="card border-0 shadow-sm bg-primary text-white rounded-3">
+                        <div className="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 className="mb-0 fw-bold">{count?.unpaid || 0}</h3>
+                                <small>UNPAID</small>
+                            </div>
+                            <i className="fa fa-spinner fa-2x opacity-50"></i>
                         </div>
                     </div>
                 </div>
-
-                { hasAnyPermission(['dashboard.statistics']) &&
-                    <div className="row mt-2">
-                        <div className="col-12 col-lg-3 mb-4">
-                            <div className="card border-0 shadow-sm overflow-hidden">
-                                <div className="card-body p-0 d-flex align-items-center">
-                                    <div className="bg-primary py-4 px-5 mfe-3" style={{ width: "130px" }}>
-                                        <i className="fas fa-circle-notch fa-spin fa-2x text-white"></i>
-                                    </div>
-                                    <div>
-                                        <div className="text-value text-primary">{count.unpaid}</div>
-                                        <div className="text-muted text-uppercase font-weight-bold small">
-                                            UNPAID
-                                        </div>
-                                    </div>
-                                </div>
+                <div className="col-md-3 col-6 mb-3">
+                    <div className="card border-0 shadow-sm bg-success text-white rounded-3">
+                        <div className="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 className="mb-0 fw-bold">{count?.paid || 0}</h3>
+                                <small>PAID</small>
                             </div>
-                        </div>
-                        <div className="col-12 col-lg-3 mb-4">
-                            <div className="card border-0 rounded shadow-sm overflow-hidden">
-                                <div className="card-body p-0 d-flex align-items-center">
-                                    <div className="bg-success py-4 px-5 mfe-3" style={{ width: "130px" }}>
-                                        <i className="fas fa-check-circle fa-2x text-white"></i>
-                                    </div>
-                                    <div>
-                                        <div className="text-value text-success">{count.paid}</div>
-                                        <div className="text-muted text-uppercase font-weight-bold small">
-                                            PAID
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-12 col-lg-3 mb-4">
-                            <div className="card border-0 rounded shadow-sm overflow-hidden">
-                                <div className="card-body p-0 d-flex align-items-center">
-                                    <div className="bg-warning py-4 px-5 mfe-3" style={{ width: "130px" }}>
-                                        <i className="fas fa-exclamation-triangle fa-2x text-white"></i>
-                                    </div>
-                                    <div>
-                                        <div className="text-value text-warning">{count.expired}</div>
-                                        <div className="text-muted text-uppercase font-weight-bold small">
-                                            EXPIRED
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="col-12 col-lg-3 mb-4">
-                            <div className="card border-0 rounded shadow-sm overflow-hidden">
-                                <div className="card-body p-0 d-flex align-items-center">
-                                    <div className="bg-danger py-4 px-5 mfe-3" style={{ width: "130px" }}>
-                                        <i className="fas fa-times fa-2x text-white"></i>
-                                    </div>
-                                    <div>
-                                        <div className="text-value text-danger">{count.cancelled}</div>
-                                        <div className="text-muted text-uppercase font-weight-bold small">
-                                            CANCELLED
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <i className="fa fa-check-circle fa-2x opacity-50"></i>
                         </div>
                     </div>
-                }
-
-                {hasAnyPermission(['dashboard.chart']) &&
-                    <div className="row mt-2">
-                        <div className="col-12 col-md-12 col-lg-12 mb-4">
-                            <div className="card border-0 border-top-success shadow-sm">
-                                <div className="card-header fw-bold">
-                                    <i className="fa fa-chart-bar"></i>  CHART REVENUE {new Date().getFullYear()}
-                                </div>
-                                <div className="card-body">
-                                    <Line options={options} data={data} />;
-                                </div>
+                </div>
+                <div className="col-md-3 col-6 mb-3">
+                    <div className="card border-0 shadow-sm bg-warning text-dark rounded-3">
+                        <div className="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 className="mb-0 fw-bold">{count?.expired || 0}</h3>
+                                <small>EXPIRED</small>
                             </div>
+                            <i className="fa fa-exclamation-triangle fa-2x opacity-50"></i>
                         </div>
                     </div>
-                }
+                </div>
+                <div className="col-md-3 col-6 mb-3">
+                    <div className="card border-0 shadow-sm bg-danger text-white rounded-3">
+                        <div className="card-body d-flex align-items-center justify-content-between">
+                            <div>
+                                <h3 className="mb-0 fw-bold">{count?.cancelled || 0}</h3>
+                                <small>CANCELLED</small>
+                            </div>
+                            <i className="fa fa-times-circle fa-2x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-            </LayoutAccount>
-        </>
-    )
-
+            {/* Row Chart Revenue */}
+            <div className="row">
+                <div className="col-12">
+                    <div className="card border-0 rounded shadow-sm">
+                        <div className="card-header bg-white fw-bold py-3">
+                            <i className="fa fa-bar-chart me-2"></i> CHART REVENUE {chart?.year}
+                        </div>
+                        <div className="card-body">
+                            <Bar data={chartData} options={chartOptions} height={100} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </LayoutAccount>
+    );
 }
