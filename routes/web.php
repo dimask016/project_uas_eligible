@@ -8,6 +8,7 @@ use App\Http\Controllers\Web\CheckoutController;
 use App\Http\Controllers\Web\HomeController;
 use App\Http\Controllers\Web\ProductController;
 use App\Http\Controllers\Web\SearchController;
+use App\Http\Controllers\Web\MyOrderController;
 use App\Http\Controllers\Account\TransactionController;
 use App\Http\Controllers\Account\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Account\CategoryController as AdminCategoryController;
@@ -61,6 +62,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkouts/cities', [CheckoutController::class, 'getCities'])->name('web.checkouts.getCities');
     Route::get('/checkouts/districts', [CheckoutController::class, 'getDistricts'])->name('web.checkouts.getDistricts');
     Route::post('/checkouts/check-ongkir', [CheckoutController::class, 'checkOngkir'])->name('web.checkouts.checkOngkir');
+
+    // =========================================================================
+    // MY ORDERS ROUTES (History Transaction khusus Customer / Public Storefront)
+    // =========================================================================
+    Route::get('/my-orders', [MyOrderController::class, 'index'])->name('web.my-orders.index');
+    Route::get('/my-orders/{invoice}', [MyOrderController::class, 'show'])->name('web.my-orders.show');
 });
 
 // =========================================================================

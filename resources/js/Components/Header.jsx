@@ -5,6 +5,9 @@ export default function Header() {
     // Fallback object agar tidak throw error saat props belum ter-load
     const { auth = {}, dataCarts = {} } = usePage().props || {};
 
+    // Cek apakah user yang sedang login memiliki role 'admin'
+    const isAdmin = auth.user && auth.user.roles && auth.user.roles.some(role => role.name === 'admin');
+
     // Handler Logout dengan Redirect ke Halaman Utama
     const handleLogout = (e) => {
         e.preventDefault();
@@ -58,17 +61,30 @@ export default function Header() {
                                 <span>{auth.user.name}</span>
                             </button>
                             <ul className="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="userDropdown">
+                                
+                                {/* 1. Menu Dashboard Account (HANYA MUNCUL UNTUK ADMIN) */}
+                                {isAdmin && (
+                                    <li>
+                                        <Link className="dropdown-item py-2 fw-semibold text-danger" href="/account/dashboard">
+                                            <i className="fa fa-tachometer-alt me-2"></i> Dashboard Account
+                                        </Link>
+                                    </li>
+                                )}
+
+                                {/* 2. Menu My Orders (DINAMIS SESUAI ROLE) */}
                                 <li>
-                                    <Link className="dropdown-item py-2" href="/account/dashboard">
-                                        <i className="fa fa-tachometer-alt me-2 text-muted"></i> Dashboard Account
+                                    <Link 
+                                        className="dropdown-item py-2" 
+                                        href={isAdmin ? "/account/transactions" : "/my-orders"}
+                                    >
+                                        <i className="fa fa-shopping-cart me-2 text-muted"></i> 
+                                        {isAdmin ? "Kelola Transaksi (Admin)" : "My Orders"}
                                     </Link>
                                 </li>
-                                <li>
-                                    <Link className="dropdown-item py-2" href="/account/transactions">
-                                        <i className="fa fa-shopping-cart me-2 text-muted"></i> My Orders
-                                    </Link>
-                                </li>
+
                                 <li><hr className="dropdown-divider" /></li>
+                                
+                                {/* 3. Tombol Logout */}
                                 <li>
                                     <button className="dropdown-item py-2 text-danger fw-semibold" onClick={handleLogout}>
                                         <i className="fa fa-sign-out-alt me-2"></i> Logout
